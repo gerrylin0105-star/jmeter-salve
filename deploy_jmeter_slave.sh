@@ -161,6 +161,11 @@ wecho "建議主機配置（運行 ${SLAVE_COUNT} 個容器）："
 echo "  CPU: $(( SLAVE_COUNT * 2 + 2 )) 核心以上"
 echo "  記憶體: $(( SLAVE_COUNT * 6 + 2 ))GB 以上"
 echo ""
+wecho "防火牆端口要求："
+echo "  RMI 控制端口: ${BASE_PORT}-$((BASE_PORT + SLAVE_COUNT - 1))"
+echo "  RMI 數據端口: ${DATA_BASE}-$((DATA_BASE + SLAVE_COUNT - 1))"
+echo "  請確保這些端口已開放給 Master 節點"
+echo ""
 
 # 生成 docker-compose.yml 檔頭
 cat > "$COMPOSE_FILE" <<EOF
@@ -169,8 +174,11 @@ version: "3.9"
 # JMeter Slave 分散式測試節點
 # 生成時間: $(date '+%Y-%m-%d %H:%M:%S')
 # 容器數量: ${SLAVE_COUNT}
-# RMI 端口範圍: ${BASE_PORT}-$((BASE_PORT + SLAVE_COUNT - 1))
-# Data 端口範圍: ${DATA_BASE}-$((DATA_BASE + SLAVE_COUNT - 1))
+# RMI 控制端口: ${BASE_PORT}-$((BASE_PORT + SLAVE_COUNT - 1))
+# RMI 數據端口: ${DATA_BASE}-$((DATA_BASE + SLAVE_COUNT - 1))
+#
+# Master 連線設定（在 jmeter.properties）:
+# remote_hosts=${PUBLIC_IP}:${BASE_PORT}$(for i in $(seq 2 $SLAVE_COUNT); do echo -n ",${PUBLIC_IP}:$((BASE_PORT + i - 1))"; done)
 
 services:
 EOF
@@ -189,7 +197,7 @@ for i in $(seq 1 $SLAVE_COUNT); do
     network_mode: "host"
     environment:
       - TZ=${TIMEZONE}
-      - JAVA_OPTS=-Xms1g -Xmx4g -XX:MetaspaceSize=512m -XX:MaxMetaspaceSize=1024m -XX:+UseG1GC -XX:+UseStringDeduplication -Duser.timezone=${TIMEZONE}
+      - JAVA_OPTS=-Xms1g -Xmx4g -XX:MetaspaceSize=512m -XX:MaxMetaspaceSize=1024m -XX:+UseG1GC -XX:+UseStringDeduplication -Duser.timezone=${TIMEZONE} -Dsun.rmi.transport.tcp.responseTimeout=60000 -Djava.net.preferIPv4Stack=true
     volumes:
       - ${JMETER_DIR}:/opt/apache-jmeter-5.6.3:ro
       - /tmp/jmeter-${i}:/tmp
@@ -206,7 +214,9 @@ for i in $(seq 1 $SLAVE_COUNT); do
       - jmeter-server
       - -Dserver.rmi.ssl.disable=true
       - -Dserver_port=${RMI_PORT}
+      - -Dserver.rmi.localport=${DATA_PORT}
       - -Djava.rmi.server.hostname=${PUBLIC_IP}
+      - -Dclient.rmi.localport=0
 
 EOF
 done
