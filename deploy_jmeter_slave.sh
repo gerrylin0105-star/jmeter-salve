@@ -99,23 +99,30 @@ fi
 echo ""
 
 #-----------------------------
-# 解壓 JMeter 到主機
+# 下載並解壓 JMeter
 #-----------------------------
-cecho "[2/6] 解壓 JMeter 到主機..."
+cecho "[2/6] 下載並解壓 JMeter..."
+JMETER_URL="https://dlcdn.apache.org/jmeter/binaries/apache-jmeter-5.6.3.tgz"
 JMETER_TAR="${SCRIPT_DIR}/apache-jmeter-5.6.3.tgz"
 JMETER_DIR="${SCRIPT_DIR}/apache-jmeter-5.6.3"
 
-if [[ ! -f "$JMETER_TAR" ]]; then
-  eecho "找不到 JMeter 壓縮檔：$JMETER_TAR"
-  exit 1
-fi
-
 if [[ ! -d "$JMETER_DIR" ]]; then
+  if [[ ! -f "$JMETER_TAR" ]]; then
+    cecho "從網路下載 JMeter..."
+    wget -q --show-progress "$JMETER_URL" -O "$JMETER_TAR" || {
+      eecho "JMeter 下載失敗"
+      exit 1
+    }
+  fi
+
   cecho "解壓 JMeter 到 ${SCRIPT_DIR}..."
   tar -xzf "$JMETER_TAR" -C "${SCRIPT_DIR}/"
   chmod -R 755 "$JMETER_DIR"
+
+  cecho "清理下載檔案..."
+  rm -f "$JMETER_TAR"
 else
-  cecho "JMeter 已存在於 $JMETER_DIR，跳過解壓"
+  cecho "JMeter 已存在於 $JMETER_DIR，跳過下載"
 fi
 echo ""
 

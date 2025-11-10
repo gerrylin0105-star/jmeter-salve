@@ -27,8 +27,8 @@ jobs:
           sudo mkdir -p /opt/jmeter-slave
           cd /opt/jmeter-slave
 
-          # 從 GitHub 下載最新代碼（淺克隆加速）
-          sudo git clone --depth=1 https://github.com/gerrylin0105-star/jmeter-salve.git .
+          # 從 GitHub 下載最新代碼
+          sudo git clone https://github.com/gerrylin0105-star/jmeter-salve.git .
 
           # 賦予執行權限
           sudo chmod +x deploy_jmeter_slave.sh online_deploy_slave.sh
