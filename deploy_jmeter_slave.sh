@@ -103,7 +103,7 @@ echo ""
 #-----------------------------
 cecho "[2/6] 解壓 JMeter 到主機..."
 JMETER_TAR="${SCRIPT_DIR}/apache-jmeter-5.6.3.tgz"
-JMETER_DIR="/opt/apache-jmeter-5.6.3"
+JMETER_DIR="${SCRIPT_DIR}/apache-jmeter-5.6.3"
 
 if [[ ! -f "$JMETER_TAR" ]]; then
   eecho "找不到 JMeter 壓縮檔：$JMETER_TAR"
@@ -111,9 +111,9 @@ if [[ ! -f "$JMETER_TAR" ]]; then
 fi
 
 if [[ ! -d "$JMETER_DIR" ]]; then
-  cecho "解壓 JMeter 到 /opt..."
-  sudo tar -xzf "$JMETER_TAR" -C /opt/
-  sudo chmod -R 755 "$JMETER_DIR"
+  cecho "解壓 JMeter 到 ${SCRIPT_DIR}..."
+  tar -xzf "$JMETER_TAR" -C "${SCRIPT_DIR}/"
+  chmod -R 755 "$JMETER_DIR"
 else
   cecho "JMeter 已存在於 $JMETER_DIR，跳過解壓"
 fi
