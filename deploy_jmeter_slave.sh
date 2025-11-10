@@ -130,8 +130,8 @@ if [[ ! -d "$JMETER_DIR" ]]; then
   cecho "安裝 Plugins Manager CMD..."
   java -cp "${JMETER_DIR}/lib/ext/jmeter-plugins-manager.jar" org.jmeterplugins.repository.PluginManagerCMDInstaller
 
-  cecho "安裝常用 JMeter Plugins（包含 SteppingThreadGroup）..."
-  "${JMETER_DIR}/bin/PluginsManagerCMD.sh" install-all-except jpgc-hadoop,jpgc-oauth,ulp-jmeter-autocorrelator-plugin,ulp-jmeter-videostreaming-plugin
+  cecho "安裝必要的 JMeter Plugins..."
+  "${JMETER_DIR}/bin/PluginsManagerCMD.sh" install jpgc-casutg,jpgc-dummy,jpgc-ffw,jpgc-fifo,jpgc-functions,jpgc-json,jpgc-perfmon,jpgc-prmctl,jpgc-tst
 
   secho "JMeter 及 Plugins 安裝完成"
 else
@@ -179,7 +179,7 @@ for i in $(seq 1 $SLAVE_COUNT); do
     network_mode: "host"
     environment:
       - TZ=${TIMEZONE}
-      - JAVA_OPTS=-Xms512m -Xmx2048m -XX:MetaspaceSize=256m -XX:MaxMetaspaceSize=512m -XX:+UseG1GC -Duser.timezone=${TIMEZONE}
+      - JAVA_OPTS=-Xms512m -Xmx2048m -XX:MetaspaceSize=512m -XX:MaxMetaspaceSize=1024m -XX:+UseG1GC -Duser.timezone=${TIMEZONE}
     volumes:
       - ${JMETER_DIR}:/opt/apache-jmeter-5.6.3:ro
       - /tmp/jmeter-${i}:/tmp
