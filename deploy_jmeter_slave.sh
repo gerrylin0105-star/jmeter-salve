@@ -99,105 +99,15 @@ fi
 echo ""
 
 #-----------------------------
-# 下載並解壓 JMeter
-#-----------------------------
-cecho "[2/6] 下載並解壓 JMeter..."
-JMETER_URL="https://dlcdn.apache.org/jmeter/binaries/apache-jmeter-5.6.3.tgz"
-JMETER_TAR="${SCRIPT_DIR}/apache-jmeter-5.6.3.tgz"
-JMETER_DIR="${SCRIPT_DIR}/apache-jmeter-5.6.3"
-
-if [[ ! -d "$JMETER_DIR" ]]; then
-  if [[ ! -f "$JMETER_TAR" ]]; then
-    cecho "從網路下載 JMeter..."
-    wget -q --show-progress "$JMETER_URL" -O "$JMETER_TAR" || {
-      eecho "JMeter 下載失敗"
-      exit 1
-    }
-  fi
-
-  cecho "解壓 JMeter 到 ${SCRIPT_DIR}..."
-  tar -xzf "$JMETER_TAR" -C "${SCRIPT_DIR}/"
-  chmod -R 755 "$JMETER_DIR"
-
-  cecho "清理下載檔案..."
-  rm -f "$JMETER_TAR"
-
-  # 安裝 JMeter Plugins
-  cecho "安裝 JMeter Plugins Manager..."
-
-  # 確保目錄存在
-  mkdir -p "${JMETER_DIR}/lib/ext"
-
-  # 下載 Plugins Manager（重試 3 次）
-  RETRY=0
-  MAX_RETRY=3
-  while [ $RETRY -lt $MAX_RETRY ]; do
-    if wget --timeout=30 --tries=3 https://jmeter-plugins.org/get/ -O "${JMETER_DIR}/lib/ext/jmeter-plugins-manager.jar"; then
-      if [ -s "${JMETER_DIR}/lib/ext/jmeter-plugins-manager.jar" ]; then
-        cecho "✓ Plugins Manager 下載成功"
-        break
-      fi
-    fi
-    RETRY=$((RETRY + 1))
-    wecho "下載失敗，重試 $RETRY/$MAX_RETRY..."
-    sleep 2
-  done
-
-  if [ ! -s "${JMETER_DIR}/lib/ext/jmeter-plugins-manager.jar" ]; then
-    eecho "Plugins Manager 下載失敗，請檢查網路連線"
-    exit 1
-  fi
-
-  # 下載 cmdrunner
-  if ! wget --timeout=30 --tries=3 https://repo1.maven.org/maven2/kg/apc/cmdrunner/2.3/cmdrunner-2.3.jar -O "${JMETER_DIR}/lib/cmdrunner-2.3.jar"; then
-    eecho "cmdrunner 下載失敗"
-    exit 1
-  fi
-
-  # 設置權限
-  chmod 644 "${JMETER_DIR}/lib/ext/jmeter-plugins-manager.jar"
-  chmod 644 "${JMETER_DIR}/lib/cmdrunner-2.3.jar"
-
-  cecho "安裝 Plugins Manager CMD..."
-  if ! java -cp "${JMETER_DIR}/lib/ext/jmeter-plugins-manager.jar" org.jmeterplugins.repository.PluginManagerCMDInstaller; then
-    eecho "Plugins Manager CMD 安裝失敗"
-    exit 1
-  fi
-
-  # 確認 PluginsManagerCMD.sh 存在且可執行
-  if [ ! -f "${JMETER_DIR}/bin/PluginsManagerCMD.sh" ]; then
-    eecho "PluginsManagerCMD.sh 未生成"
-    exit 1
-  fi
-  chmod +x "${JMETER_DIR}/bin/PluginsManagerCMD.sh"
-
-  cecho "安裝 JMeter Plugins（與 Master 保持一致）..."
-  cecho "這可能需要幾分鐘時間，請耐心等待..."
-
-  if "${JMETER_DIR}/bin/PluginsManagerCMD.sh" install-all-except jpgc-hadoop,jpgc-oauth,ulp-jmeter-autocorrelator-plugin,ulp-jmeter-videostreaming-plugin,jmeter.backendlistener.azure,jmeter.backendlistener.elasticsearch,jmeter.backendlistener.kafka; then
-    secho "✓ JMeter Plugins 安裝完成"
-    cecho "已安裝的 JAR 數量: $(ls "${JMETER_DIR}/lib/ext/"*.jar 2>/dev/null | wc -l)"
-  else
-    wecho "部分 Plugins 安裝失敗，但會繼續部署"
-  fi
-
-  secho "JMeter 及 Plugins 準備完成"
-else
-  cecho "JMeter 已存在於 $JMETER_DIR，跳過下載"
-fi
-echo ""
-
-#-----------------------------
 # 生成 docker-compose.yml
 #-----------------------------
-cecho "[3/6] 生成 docker-compose.yml..."
+cecho "[2/4] 生成 docker-compose.yml..."
 echo "配置："
 echo "  容器數量: ${SLAVE_COUNT}"
 echo "  RMI 端口: ${BASE_PORT}-$((BASE_PORT + SLAVE_COUNT - 1))"
 echo "  Data 端口: ${DATA_BASE}-$((DATA_BASE + SLAVE_COUNT - 1))"
 echo "  主機 IP: ${PUBLIC_IP}"
 echo "  時區: ${TIMEZONE}"
-echo "  JMeter 掛載: ${JMETER_DIR}"
 echo ""
 echo "資源配置（每個容器）："
 echo "  JVM Heap: 1GB - 4GB"
@@ -246,9 +156,6 @@ for i in $(seq 1 $SLAVE_COUNT); do
     environment:
       - TZ=${TIMEZONE}
       - JAVA_OPTS=-Xms1g -Xmx4g -XX:MetaspaceSize=768m -XX:MaxMetaspaceSize=1536m -XX:+UseG1GC -XX:+UseStringDeduplication -Duser.timezone=${TIMEZONE} -Dsun.rmi.transport.tcp.responseTimeout=60000 -Djava.net.preferIPv4Stack=true
-    volumes:
-      - ${JMETER_DIR}:/opt/apache-jmeter-5.6.3:ro
-      - /tmp/jmeter-${i}:/tmp
     working_dir: /tmp
     deploy:
       resources:
@@ -275,7 +182,7 @@ echo ""
 #-----------------------------
 # 清理舊容器
 #-----------------------------
-cecho "[4/6] 清理舊容器..."
+cecho "[3/4] 清理舊容器..."
 
 # 若有 docker-compose 檔案，先正常 down
 if [ -f "$COMPOSE_FILE" ]; then
@@ -291,7 +198,7 @@ echo ""
 #-----------------------------
 # 啟動容器
 #-----------------------------
-cecho "[5/6] 使用 docker-compose 啟動容器..."
+cecho "[4/4] 使用 docker-compose 啟動容器..."
 if ! $COMPOSE_CMD -f "$COMPOSE_FILE" up -d; then
   eecho "容器啟動失敗"
   eecho "請執行以下命令查看詳細日誌："
@@ -303,7 +210,7 @@ echo ""
 #-----------------------------
 # 驗證部署
 #-----------------------------
-cecho "[6/6] 驗證部署..."
+cecho "驗證部署..."
 sleep 3
 
 RUNNING=$(docker ps --filter "name=jmeter-slave-" --format "{{.Names}}" | wc -l | tr -d ' ')

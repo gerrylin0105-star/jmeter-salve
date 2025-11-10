@@ -12,6 +12,7 @@ ENV JMETER_HOME=/opt/apache-jmeter-${JMETER_VERSION} \
 # 安裝必要套件並設定時區
 RUN apt-get update && apt-get install -y \
     openjdk-11-jre-headless \
+    wget \
     ca-certificates \
     net-tools \
     iputils-ping \
@@ -22,5 +23,26 @@ RUN apt-get update && apt-get install -y \
     && echo "Asia/Taipei" > /etc/timezone \
     && rm -rf /var/lib/apt/lists/*
 
+# 下載並安裝 JMeter
+RUN wget -q https://dlcdn.apache.org/jmeter/binaries/apache-jmeter-${JMETER_VERSION}.tgz \
+    && tar -xzf apache-jmeter-${JMETER_VERSION}.tgz -C /opt/ \
+    && rm apache-jmeter-${JMETER_VERSION}.tgz \
+    && chmod +x ${JMETER_HOME}/bin/*.sh
+
+# 安裝 JMeter Plugins Manager
+RUN wget -q https://jmeter-plugins.org/get/ -O ${JMETER_HOME}/lib/ext/jmeter-plugins-manager.jar \
+    && wget -q https://repo1.maven.org/maven2/kg/apc/cmdrunner/2.3/cmdrunner-2.3.jar -O ${JMETER_HOME}/lib/cmdrunner-2.3.jar \
+    && java -cp ${JMETER_HOME}/lib/ext/jmeter-plugins-manager.jar org.jmeterplugins.repository.PluginManagerCMDInstaller \
+    && chmod +x ${JMETER_HOME}/bin/PluginsManagerCMD.sh
+
+# 安裝常用 JMeter Plugins
+RUN ${JMETER_HOME}/bin/PluginsManagerCMD.sh install-all-except \
+    jpgc-hadoop,jpgc-oauth,\
+    ulp-jmeter-autocorrelator-plugin,\
+    ulp-jmeter-videostreaming-plugin,\
+    jmeter.backendlistener.azure,\
+    jmeter.backendlistener.elasticsearch,\
+    jmeter.backendlistener.kafka
+
 # 建立工作目錄
-WORKDIR ${JMETER_HOME}
+WORKDIR /tmp
