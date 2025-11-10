@@ -30,5 +30,13 @@ RUN wget https://archive.apache.org/dist/jmeter/binaries/apache-jmeter-${JMETER_
     && rm apache-jmeter-${JMETER_VERSION}.tgz \
     && chmod +x ${JMETER_HOME}/bin/*.sh
 
+# 安裝 JMeter Plugins Manager
+RUN wget https://jmeter-plugins.org/get/ -O ${JMETER_HOME}/lib/ext/jmeter-plugins-manager.jar \
+    && wget https://repo1.maven.org/maven2/kg/apc/cmdrunner/2.3/cmdrunner-2.3.jar -O ${JMETER_HOME}/lib/cmdrunner-2.3.jar \
+    && java -cp ${JMETER_HOME}/lib/ext/jmeter-plugins-manager.jar org.jmeterplugins.repository.PluginManagerCMDInstaller
+
+# 安裝常用 JMeter Plugins
+RUN ${JMETER_HOME}/bin/PluginsManagerCMD.sh install-all-except jpgc-hadoop,jpgc-oauth,ulp-jmeter-autocorrelator-plugin,ulp-jmeter-videostreaming-plugin
+
 # 建立工作目錄
 WORKDIR ${JMETER_HOME}
