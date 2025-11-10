@@ -121,6 +121,19 @@ if [[ ! -d "$JMETER_DIR" ]]; then
 
   cecho "清理下載檔案..."
   rm -f "$JMETER_TAR"
+
+  # 安裝 JMeter Plugins
+  cecho "安裝 JMeter Plugins Manager..."
+  wget -q https://jmeter-plugins.org/get/ -O "${JMETER_DIR}/lib/ext/jmeter-plugins-manager.jar"
+  wget -q https://repo1.maven.org/maven2/kg/apc/cmdrunner/2.3/cmdrunner-2.3.jar -O "${JMETER_DIR}/lib/cmdrunner-2.3.jar"
+
+  cecho "安裝 Plugins Manager CMD..."
+  java -cp "${JMETER_DIR}/lib/ext/jmeter-plugins-manager.jar" org.jmeterplugins.repository.PluginManagerCMDInstaller
+
+  cecho "安裝常用 JMeter Plugins（包含 SteppingThreadGroup）..."
+  "${JMETER_DIR}/bin/PluginsManagerCMD.sh" install-all-except jpgc-hadoop,jpgc-oauth,ulp-jmeter-autocorrelator-plugin,ulp-jmeter-videostreaming-plugin
+
+  secho "JMeter 及 Plugins 安裝完成"
 else
   cecho "JMeter 已存在於 $JMETER_DIR，跳過下載"
 fi
