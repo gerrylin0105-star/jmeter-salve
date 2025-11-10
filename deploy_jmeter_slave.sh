@@ -124,17 +124,64 @@ if [[ ! -d "$JMETER_DIR" ]]; then
 
   # 安裝 JMeter Plugins
   cecho "安裝 JMeter Plugins Manager..."
-  wget -q https://jmeter-plugins.org/get/ -O "${JMETER_DIR}/lib/ext/jmeter-plugins-manager.jar"
-  wget -q https://repo1.maven.org/maven2/kg/apc/cmdrunner/2.3/cmdrunner-2.3.jar -O "${JMETER_DIR}/lib/cmdrunner-2.3.jar"
+
+  # 確保目錄存在
+  mkdir -p "${JMETER_DIR}/lib/ext"
+
+  # 下載 Plugins Manager（重試 3 次）
+  RETRY=0
+  MAX_RETRY=3
+  while [ $RETRY -lt $MAX_RETRY ]; do
+    if wget --timeout=30 --tries=3 https://jmeter-plugins.org/get/ -O "${JMETER_DIR}/lib/ext/jmeter-plugins-manager.jar"; then
+      if [ -s "${JMETER_DIR}/lib/ext/jmeter-plugins-manager.jar" ]; then
+        cecho "✓ Plugins Manager 下載成功"
+        break
+      fi
+    fi
+    RETRY=$((RETRY + 1))
+    wecho "下載失敗，重試 $RETRY/$MAX_RETRY..."
+    sleep 2
+  done
+
+  if [ ! -s "${JMETER_DIR}/lib/ext/jmeter-plugins-manager.jar" ]; then
+    eecho "Plugins Manager 下載失敗，請檢查網路連線"
+    exit 1
+  fi
+
+  # 下載 cmdrunner
+  if ! wget --timeout=30 --tries=3 https://repo1.maven.org/maven2/kg/apc/cmdrunner/2.3/cmdrunner-2.3.jar -O "${JMETER_DIR}/lib/cmdrunner-2.3.jar"; then
+    eecho "cmdrunner 下載失敗"
+    exit 1
+  fi
+
+  # 設置權限
+  chmod 644 "${JMETER_DIR}/lib/ext/jmeter-plugins-manager.jar"
+  chmod 644 "${JMETER_DIR}/lib/cmdrunner-2.3.jar"
 
   cecho "安裝 Plugins Manager CMD..."
-  java -cp "${JMETER_DIR}/lib/ext/jmeter-plugins-manager.jar" org.jmeterplugins.repository.PluginManagerCMDInstaller
+  if ! java -cp "${JMETER_DIR}/lib/ext/jmeter-plugins-manager.jar" org.jmeterplugins.repository.PluginManagerCMDInstaller; then
+    eecho "Plugins Manager CMD 安裝失敗"
+    exit 1
+  fi
+
+  # 確認 PluginsManagerCMD.sh 存在且可執行
+  if [ ! -f "${JMETER_DIR}/bin/PluginsManagerCMD.sh" ]; then
+    eecho "PluginsManagerCMD.sh 未生成"
+    exit 1
+  fi
+  chmod +x "${JMETER_DIR}/bin/PluginsManagerCMD.sh"
 
   cecho "安裝 JMeter Plugins（與 Master 保持一致）..."
-  cecho "這可能需要幾分鐘時間..."
-  "${JMETER_DIR}/bin/PluginsManagerCMD.sh" install-all-except jpgc-hadoop,jpgc-oauth,ulp-jmeter-autocorrelator-plugin,ulp-jmeter-videostreaming-plugin,jmeter.backendlistener.azure,jmeter.backendlistener.elasticsearch,jmeter.backendlistener.kafka
+  cecho "這可能需要幾分鐘時間，請耐心等待..."
 
-  secho "JMeter 及 Plugins 安裝完成"
+  if "${JMETER_DIR}/bin/PluginsManagerCMD.sh" install-all-except jpgc-hadoop,jpgc-oauth,ulp-jmeter-autocorrelator-plugin,ulp-jmeter-videostreaming-plugin,jmeter.backendlistener.azure,jmeter.backendlistener.elasticsearch,jmeter.backendlistener.kafka; then
+    secho "✓ JMeter Plugins 安裝完成"
+    cecho "已安裝的 JAR 數量: $(ls "${JMETER_DIR}/lib/ext/"*.jar 2>/dev/null | wc -l)"
+  else
+    wecho "部分 Plugins 安裝失敗，但會繼續部署"
+  fi
+
+  secho "JMeter 及 Plugins 準備完成"
 else
   cecho "JMeter 已存在於 $JMETER_DIR，跳過下載"
 fi
