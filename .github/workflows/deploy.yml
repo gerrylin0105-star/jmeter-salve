@@ -4,21 +4,36 @@ on:
   push:
     branches: [ main ]
   workflow_dispatch:
+    inputs:
+      target_hosts:
+        description: 'Target hosts (comma-separated, e.g., 223.27.43.100,223.27.43.101)'
+        required: false
+        default: 'all'
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        host:
+          - ip: 223.27.43.100
+            username: ${{ secrets.HOST1_USERNAME }}
+            password: ${{ secrets.HOST1_PASSWORD }}
+          # 若要新增更多主機，在此處添加：
+          # - ip: 223.27.43.101
+          #   username: ${{ secrets.HOST2_USERNAME }}
+          #   password: ${{ secrets.HOST2_PASSWORD }}
 
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
 
-    - name: Deploy to target host
+    - name: Deploy to ${{ matrix.host.ip }}
       uses: appleboy/ssh-action@v1.0.0
       with:
-        host: ${{ secrets.HOST }}
-        username: ${{ secrets.USERNAME }}
-        password: ${{ secrets.PASSWORD }}
+        host: ${{ matrix.host.ip }}
+        username: ${{ matrix.host.username }}
+        password: ${{ matrix.host.password }}
         port: 22
         script: |
           # 建立部署目錄
