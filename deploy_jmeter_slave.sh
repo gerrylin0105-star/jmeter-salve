@@ -179,9 +179,11 @@ for i in $(seq 1 $SLAVE_COUNT); do
     network_mode: "host"
     environment:
       - TZ=${TIMEZONE}
-      - JAVA_OPTS=-Xms512m -Xmx2048m -XX:+UseG1GC -Duser.timezone=${TIMEZONE}
+      - JAVA_OPTS=-Xms512m -Xmx2048m -XX:MetaspaceSize=256m -XX:MaxMetaspaceSize=512m -XX:+UseG1GC -Duser.timezone=${TIMEZONE}
     volumes:
       - ${JMETER_DIR}:/opt/apache-jmeter-5.6.3:ro
+      - /tmp/jmeter-${i}:/tmp
+    working_dir: /tmp
     command:
       - jmeter-server
       - -Dserver.rmi.ssl.disable=true
