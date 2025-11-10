@@ -25,9 +25,9 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/*
 
 # 複製並安裝自訂 JMeter（包含 Plugins）
-COPY jmeter_slave.tar.gz /tmp/
-RUN tar -xzf /tmp/jmeter_slave.tar.gz -C /opt/ \
-    && rm /tmp/jmeter_slave.tar.gz \
+COPY apache-jmeter-5.6.3.tgz /tmp/
+RUN tar -xzf /tmp/apache-jmeter-5.6.3.tgz -C /opt/ \
+    && rm /tmp/apache-jmeter-5.6.3.tgz \
     && chmod +x ${JMETER_HOME}/bin/*.sh
 
 # 建立工作目錄
