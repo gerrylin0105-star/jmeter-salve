@@ -19,10 +19,21 @@ jobs:
           - ip: 223.27.43.100
             username: ${{ secrets.HOST1_USERNAME }}
             password: ${{ secrets.HOST1_PASSWORD }}
-          # 若要新增更多主機，在此處添加：
-          # - ip: 223.27.43.101
-          #   username: ${{ secrets.HOST2_USERNAME }}
-          #   password: ${{ secrets.HOST2_PASSWORD }}
+          - ip: 223.27.43.101
+            username: ${{ secrets.HOST2_USERNAME }}
+            password: ${{ secrets.HOST2_PASSWORD }}
+          - ip: 223.27.43.102
+            username: ${{ secrets.HOST3_USERNAME }}
+            password: ${{ secrets.HOST3_PASSWORD }}
+          - ip: 223.27.43.103
+            username: ${{ secrets.HOST4_USERNAME }}
+            password: ${{ secrets.HOST4_PASSWORD }}
+          - ip: 223.27.43.104
+            username: ${{ secrets.HOST5_USERNAME }}
+            password: ${{ secrets.HOST5_PASSWORD }}
+          - ip: 223.27.43.105
+            username: ${{ secrets.HOST6_USERNAME }}
+            password: ${{ secrets.HOST6_PASSWORD }}
 
     steps:
     - name: Checkout code
