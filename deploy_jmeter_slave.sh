@@ -151,6 +151,16 @@ echo "  主機 IP: ${PUBLIC_IP}"
 echo "  時區: ${TIMEZONE}"
 echo "  JMeter 掛載: ${JMETER_DIR}"
 echo ""
+echo "資源配置（每個容器）："
+echo "  JVM Heap: 1GB - 4GB"
+echo "  Metaspace: 512MB - 1GB"
+echo "  CPU 限制: 最多 2 核心（保留 1 核心）"
+echo "  記憶體限制: 最多 6GB（保留 3GB）"
+echo ""
+wecho "建議主機配置（運行 ${SLAVE_COUNT} 個容器）："
+echo "  CPU: $(( SLAVE_COUNT * 2 + 2 )) 核心以上"
+echo "  記憶體: $(( SLAVE_COUNT * 6 + 2 ))GB 以上"
+echo ""
 
 # 生成 docker-compose.yml 檔頭
 cat > "$COMPOSE_FILE" <<EOF
@@ -179,11 +189,19 @@ for i in $(seq 1 $SLAVE_COUNT); do
     network_mode: "host"
     environment:
       - TZ=${TIMEZONE}
-      - JAVA_OPTS=-Xms512m -Xmx2048m -XX:MetaspaceSize=512m -XX:MaxMetaspaceSize=1024m -XX:+UseG1GC -Duser.timezone=${TIMEZONE}
+      - JAVA_OPTS=-Xms1g -Xmx4g -XX:MetaspaceSize=512m -XX:MaxMetaspaceSize=1024m -XX:+UseG1GC -XX:+UseStringDeduplication -Duser.timezone=${TIMEZONE}
     volumes:
       - ${JMETER_DIR}:/opt/apache-jmeter-5.6.3:ro
       - /tmp/jmeter-${i}:/tmp
     working_dir: /tmp
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 6G
+        reservations:
+          cpus: '1.0'
+          memory: 3G
     command:
       - jmeter-server
       - -Dserver.rmi.ssl.disable=true
