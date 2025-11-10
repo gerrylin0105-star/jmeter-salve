@@ -12,8 +12,6 @@ ENV JMETER_HOME=/opt/apache-jmeter-${JMETER_VERSION} \
 # 安裝必要套件並設定時區
 RUN apt-get update && apt-get install -y \
     openjdk-11-jre-headless \
-    wget \
-    unzip \
     ca-certificates \
     net-tools \
     iputils-ping \
@@ -23,12 +21,6 @@ RUN apt-get update && apt-get install -y \
     && ln -sf /usr/share/zoneinfo/Asia/Taipei /etc/localtime \
     && echo "Asia/Taipei" > /etc/timezone \
     && rm -rf /var/lib/apt/lists/*
-
-# 複製並安裝自訂 JMeter（包含 Plugins）
-COPY apache-jmeter-5.6.3.tgz /tmp/
-RUN tar -xzf /tmp/apache-jmeter-5.6.3.tgz -C /opt/ \
-    && rm /tmp/apache-jmeter-5.6.3.tgz \
-    && chmod +x ${JMETER_HOME}/bin/*.sh
 
 # 建立工作目錄
 WORKDIR ${JMETER_HOME}

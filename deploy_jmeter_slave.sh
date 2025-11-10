@@ -99,15 +99,37 @@ fi
 echo ""
 
 #-----------------------------
+# 解壓 JMeter 到主機
+#-----------------------------
+cecho "[2/6] 解壓 JMeter 到主機..."
+JMETER_TAR="${SCRIPT_DIR}/apache-jmeter-5.6.3.tgz"
+JMETER_DIR="/opt/apache-jmeter-5.6.3"
+
+if [[ ! -f "$JMETER_TAR" ]]; then
+  eecho "找不到 JMeter 壓縮檔：$JMETER_TAR"
+  exit 1
+fi
+
+if [[ ! -d "$JMETER_DIR" ]]; then
+  cecho "解壓 JMeter 到 /opt..."
+  sudo tar -xzf "$JMETER_TAR" -C /opt/
+  sudo chmod -R 755 "$JMETER_DIR"
+else
+  cecho "JMeter 已存在於 $JMETER_DIR，跳過解壓"
+fi
+echo ""
+
+#-----------------------------
 # 生成 docker-compose.yml
 #-----------------------------
-cecho "[2/5] 生成 docker-compose.yml..."
+cecho "[3/6] 生成 docker-compose.yml..."
 echo "配置："
 echo "  容器數量: ${SLAVE_COUNT}"
 echo "  RMI 端口: ${BASE_PORT}-$((BASE_PORT + SLAVE_COUNT - 1))"
 echo "  Data 端口: ${DATA_BASE}-$((DATA_BASE + SLAVE_COUNT - 1))"
 echo "  主機 IP: ${PUBLIC_IP}"
 echo "  時區: ${TIMEZONE}"
+echo "  JMeter 掛載: ${JMETER_DIR}"
 echo ""
 
 # 生成 docker-compose.yml 檔頭
@@ -138,6 +160,8 @@ for i in $(seq 1 $SLAVE_COUNT); do
     environment:
       - TZ=${TIMEZONE}
       - JAVA_OPTS=-Xms512m -Xmx2048m -XX:+UseG1GC -Duser.timezone=${TIMEZONE}
+    volumes:
+      - ${JMETER_DIR}:/opt/apache-jmeter-5.6.3:ro
     command:
       - jmeter-server
       - -Dserver.rmi.ssl.disable=true
@@ -153,7 +177,7 @@ echo ""
 #-----------------------------
 # 清理舊容器
 #-----------------------------
-cecho "[3/5] 清理舊容器..."
+cecho "[4/6] 清理舊容器..."
 
 # 若有 docker-compose 檔案，先正常 down
 if [ -f "$COMPOSE_FILE" ]; then
@@ -169,7 +193,7 @@ echo ""
 #-----------------------------
 # 啟動容器
 #-----------------------------
-cecho "[4/5] 使用 docker-compose 啟動容器..."
+cecho "[5/6] 使用 docker-compose 啟動容器..."
 if ! $COMPOSE_CMD -f "$COMPOSE_FILE" up -d; then
   eecho "容器啟動失敗"
   eecho "請執行以下命令查看詳細日誌："
@@ -181,7 +205,7 @@ echo ""
 #-----------------------------
 # 驗證部署
 #-----------------------------
-cecho "[5/5] 驗證部署..."
+cecho "[6/6] 驗證部署..."
 sleep 3
 
 RUNNING=$(docker ps --filter "name=jmeter-slave-" --format "{{.Names}}" | wc -l | tr -d ' ')
