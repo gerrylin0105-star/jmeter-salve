@@ -21,12 +21,10 @@ jobs:
         password: ${{ secrets.SSH_PASSWORD }}
         port: 22
         script: |
-          # 建立部署目錄
+          # 清理並重建部署目錄
+          sudo rm -rf /opt/jmeter-slave
           sudo mkdir -p /opt/jmeter-slave
           cd /opt/jmeter-slave
-
-          # 清理舊檔案
-          sudo rm -rf *
 
           # 從 GitHub 下載最新代碼
           sudo git clone https://github.com/gerrylin0105-star/jmeter-salve.git .
