@@ -130,8 +130,9 @@ if [[ ! -d "$JMETER_DIR" ]]; then
   cecho "安裝 Plugins Manager CMD..."
   java -cp "${JMETER_DIR}/lib/ext/jmeter-plugins-manager.jar" org.jmeterplugins.repository.PluginManagerCMDInstaller
 
-  cecho "安裝必要的 JMeter Plugins..."
-  "${JMETER_DIR}/bin/PluginsManagerCMD.sh" install jpgc-casutg,jpgc-dummy,jpgc-ffw,jpgc-fifo,jpgc-functions,jpgc-json,jpgc-perfmon,jpgc-prmctl,jpgc-tst
+  cecho "安裝 JMeter Plugins（與 Master 保持一致）..."
+  cecho "這可能需要幾分鐘時間..."
+  "${JMETER_DIR}/bin/PluginsManagerCMD.sh" install-all-except jpgc-hadoop,jpgc-oauth,ulp-jmeter-autocorrelator-plugin,ulp-jmeter-videostreaming-plugin,jmeter.backendlistener.azure,jmeter.backendlistener.elasticsearch,jmeter.backendlistener.kafka
 
   secho "JMeter 及 Plugins 安裝完成"
 else
@@ -197,7 +198,7 @@ for i in $(seq 1 $SLAVE_COUNT); do
     network_mode: "host"
     environment:
       - TZ=${TIMEZONE}
-      - JAVA_OPTS=-Xms1g -Xmx4g -XX:MetaspaceSize=512m -XX:MaxMetaspaceSize=1024m -XX:+UseG1GC -XX:+UseStringDeduplication -Duser.timezone=${TIMEZONE} -Dsun.rmi.transport.tcp.responseTimeout=60000 -Djava.net.preferIPv4Stack=true
+      - JAVA_OPTS=-Xms1g -Xmx4g -XX:MetaspaceSize=768m -XX:MaxMetaspaceSize=1536m -XX:+UseG1GC -XX:+UseStringDeduplication -Duser.timezone=${TIMEZONE} -Dsun.rmi.transport.tcp.responseTimeout=60000 -Djava.net.preferIPv4Stack=true
     volumes:
       - ${JMETER_DIR}:/opt/apache-jmeter-5.6.3:ro
       - /tmp/jmeter-${i}:/tmp
