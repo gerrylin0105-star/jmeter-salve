@@ -22,8 +22,8 @@ jobs:
         port: 22
         script: |
           # 建立部署目錄
-          sudo mkdir -p /opt/jmeter-slave-deploy
-          cd /opt/jmeter-slave-deploy
+          sudo mkdir -p /opt/jmeter-slave
+          cd /opt/jmeter-slave
 
           # 清理舊檔案
           sudo rm -rf *
