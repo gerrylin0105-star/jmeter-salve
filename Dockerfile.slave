@@ -9,7 +9,7 @@ ENV DEBIAN_FRONTEND=noninteractive \
 ENV JMETER_HOME=/opt/apache-jmeter-${JMETER_VERSION} \
     PATH="/opt/apache-jmeter-${JMETER_VERSION}/bin:${PATH}"
 
-# 安裝必要套件
+# 安裝必要套件並設定時區
 RUN apt-get update && apt-get install -y \
     openjdk-11-jre-headless \
     wget \
@@ -20,6 +20,8 @@ RUN apt-get update && apt-get install -y \
     vim \
     curl \
     tzdata \
+    && ln -sf /usr/share/zoneinfo/Asia/Taipei /etc/localtime \
+    && echo "Asia/Taipei" > /etc/timezone \
     && rm -rf /var/lib/apt/lists/*
 
 # 下載並安裝 JMeter
