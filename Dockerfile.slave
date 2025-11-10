@@ -1,0 +1,32 @@
+FROM ubuntu:22.04
+
+# 設定環境變數
+ENV DEBIAN_FRONTEND=noninteractive \
+    JMETER_VERSION=5.6.3 \
+    LANG=C.UTF-8 \
+    LC_ALL=C.UTF-8
+
+ENV JMETER_HOME=/opt/apache-jmeter-${JMETER_VERSION} \
+    PATH="/opt/apache-jmeter-${JMETER_VERSION}/bin:${PATH}"
+
+# 安裝必要套件
+RUN apt-get update && apt-get install -y \
+    openjdk-11-jre-headless \
+    wget \
+    unzip \
+    ca-certificates \
+    net-tools \
+    iputils-ping \
+    vim \
+    curl \
+    tzdata \
+    && rm -rf /var/lib/apt/lists/*
+
+# 下載並安裝 JMeter
+RUN wget https://archive.apache.org/dist/jmeter/binaries/apache-jmeter-${JMETER_VERSION}.tgz \
+    && tar -xzf apache-jmeter-${JMETER_VERSION}.tgz -C /opt/ \
+    && rm apache-jmeter-${JMETER_VERSION}.tgz \
+    && chmod +x ${JMETER_HOME}/bin/*.sh
+
+# 建立工作目錄
+WORKDIR ${JMETER_HOME}

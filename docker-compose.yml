@@ -1,0 +1,179 @@
+version: "3.9"
+
+# JMeter Slave 分散式測試節點
+# 生成時間: 2025-10-13 11:08:36
+# 容器數量: 10
+# RMI 端口範圍: 7001-7010
+# Data 端口範圍: 50001-50010
+
+services:
+  223.27.43.100-jmeter-slave-1:
+    image: jmeter-slave
+    container_name: 223.27.43.100-jmeter-slave-1
+    restart: unless-stopped
+    network_mode: "host"
+    environment:
+      - TZ=Asia/Taipei
+      - JAVA_OPTS=-Xms512m -Xmx2048m -XX:+UseG1GC -Duser.timezone=Asia/Taipei
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
+    command:
+      - jmeter-server
+      - -Dserver.rmi.ssl.disable=true
+      - -Dserver_port=7001
+      - -Djava.rmi.server.hostname=223.27.43.100
+
+  223.27.43.100-jmeter-slave-2:
+    image: jmeter-slave
+    container_name: 223.27.43.100-jmeter-slave-2
+    restart: unless-stopped
+    network_mode: "host"
+    environment:
+      - TZ=Asia/Taipei
+      - JAVA_OPTS=-Xms512m -Xmx2048m -XX:+UseG1GC -Duser.timezone=Asia/Taipei
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
+    command:
+      - jmeter-server
+      - -Dserver.rmi.ssl.disable=true
+      - -Dserver_port=7002
+      - -Djava.rmi.server.hostname=223.27.43.100
+
+  223.27.43.100-jmeter-slave-3:
+    image: jmeter-slave
+    container_name: 223.27.43.100-jmeter-slave-3
+    restart: unless-stopped
+    network_mode: "host"
+    environment:
+      - TZ=Asia/Taipei
+      - JAVA_OPTS=-Xms512m -Xmx2048m -XX:+UseG1GC -Duser.timezone=Asia/Taipei
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
+    command:
+      - jmeter-server
+      - -Dserver.rmi.ssl.disable=true
+      - -Dserver_port=7003
+      - -Djava.rmi.server.hostname=223.27.43.100
+
+  223.27.43.100-jmeter-slave-4:
+    image: jmeter-slave
+    container_name: 223.27.43.100-jmeter-slave-4
+    restart: unless-stopped
+    network_mode: "host"
+    environment:
+      - TZ=Asia/Taipei
+      - JAVA_OPTS=-Xms512m -Xmx2048m -XX:+UseG1GC -Duser.timezone=Asia/Taipei
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
+    command:
+      - jmeter-server
+      - -Dserver.rmi.ssl.disable=true
+      - -Dserver_port=7004
+      - -Djava.rmi.server.hostname=223.27.43.100
+
+  223.27.43.100-jmeter-slave-5:
+    image: jmeter-slave
+    container_name: 223.27.43.100-jmeter-slave-5
+    restart: unless-stopped
+    network_mode: "host"
+    environment:
+      - TZ=Asia/Taipei
+      - JAVA_OPTS=-Xms512m -Xmx2048m -XX:+UseG1GC -Duser.timezone=Asia/Taipei
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
+    command:
+      - jmeter-server
+      - -Dserver.rmi.ssl.disable=true
+      - -Dserver_port=7005
+      - -Djava.rmi.server.hostname=223.27.43.100
+
+  223.27.43.100-jmeter-slave-6:
+    image: jmeter-slave
+    container_name: 223.27.43.100-jmeter-slave-6
+    restart: unless-stopped
+    network_mode: "host"
+    environment:
+      - TZ=Asia/Taipei
+      - JAVA_OPTS=-Xms512m -Xmx2048m -XX:+UseG1GC -Duser.timezone=Asia/Taipei
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
+    command:
+      - jmeter-server
+      - -Dserver.rmi.ssl.disable=true
+      - -Dserver_port=7006
+      - -Djava.rmi.server.hostname=223.27.43.100
+
+  223.27.43.100-jmeter-slave-7:
+    image: jmeter-slave
+    container_name: 223.27.43.100-jmeter-slave-7
+    restart: unless-stopped
+    network_mode: "host"
+    environment:
+      - TZ=Asia/Taipei
+      - JAVA_OPTS=-Xms512m -Xmx2048m -XX:+UseG1GC -Duser.timezone=Asia/Taipei
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
+    command:
+      - jmeter-server
+      - -Dserver.rmi.ssl.disable=true
+      - -Dserver_port=7007
+      - -Djava.rmi.server.hostname=223.27.43.100
+
+  223.27.43.100-jmeter-slave-8:
+    image: jmeter-slave
+    container_name: 223.27.43.100-jmeter-slave-8
+    restart: unless-stopped
+    network_mode: "host"
+    environment:
+      - TZ=Asia/Taipei
+      - JAVA_OPTS=-Xms512m -Xmx2048m -XX:+UseG1GC -Duser.timezone=Asia/Taipei
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
+    command:
+      - jmeter-server
+      - -Dserver.rmi.ssl.disable=true
+      - -Dserver_port=7008
+      - -Djava.rmi.server.hostname=223.27.43.100
+
+  223.27.43.100-jmeter-slave-9:
+    image: jmeter-slave
+    container_name: 223.27.43.100-jmeter-slave-9
+    restart: unless-stopped
+    network_mode: "host"
+    environment:
+      - TZ=Asia/Taipei
+      - JAVA_OPTS=-Xms512m -Xmx2048m -XX:+UseG1GC -Duser.timezone=Asia/Taipei
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
+    command:
+      - jmeter-server
+      - -Dserver.rmi.ssl.disable=true
+      - -Dserver_port=7009
+      - -Djava.rmi.server.hostname=223.27.43.100
+
+  223.27.43.100-jmeter-slave-10:
+    image: jmeter-slave
+    container_name: 223.27.43.100-jmeter-slave-10
+    restart: unless-stopped
+    network_mode: "host"
+    environment:
+      - TZ=Asia/Taipei
+      - JAVA_OPTS=-Xms512m -Xmx2048m -XX:+UseG1GC -Duser.timezone=Asia/Taipei
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
+    command:
+      - jmeter-server
+      - -Dserver.rmi.ssl.disable=true
+      - -Dserver_port=7010
+      - -Djava.rmi.server.hostname=223.27.43.100
+
