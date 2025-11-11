@@ -8,15 +8,26 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        host:
+          - ip: 223.27.43.100
+            name: host-100
+          - ip: 223.27.43.101
+            name: host-101
+          - ip: 223.27.43.120
+            name: host-120
+          - ip: 223.27.43.121
+            name: host-121
 
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
 
-    - name: Deploy to 223.27.43.100
+    - name: Deploy to ${{ matrix.host.ip }}
       uses: appleboy/ssh-action@v1.0.0
       with:
-        host: 223.27.43.100
+        host: ${{ matrix.host.ip }}
         username: ${{ secrets.SSH_USERNAME }}
         password: ${{ secrets.SSH_PASSWORD }}
         port: 22
@@ -31,7 +42,7 @@ jobs:
           sudo git clone https://github.com/gerrylin0105-star/jmeter-salve.git .
 
           # 賦予執行權限
-          sudo chmod +x deploy_jmeter_slave.sh online_deploy_slave.sh
+          sudo chmod +x deploy_jmeter_slave.sh online_deploy_slave.sh diagnose.sh
 
           # 執行部署腳本
           sudo ./deploy_jmeter_slave.sh
